@@ -10,3 +10,5 @@ PWM1\PWM1.c
 
 PWM2\PWM2.c
 
+UART\UART.c
+
