@@ -9,8 +9,8 @@ import serial
 from Adafruit_IO import MQTTClient
 
 
-ADAFRUIT_IO_USERNAME = "poner su username"
-ADAFRUIT_IO_KEY      = "poner su clave"
+ADAFRUIT_IO_USERNAME = 
+ADAFRUIT_IO_KEY      = 
 
 # Set to the ID of the feed to subscribe to for updates.
 feedsecuenciap = 'secuenciap'
