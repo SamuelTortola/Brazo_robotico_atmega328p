@@ -5,38 +5,43 @@ import random
 import serial
 
 
-# This example uses the MQTTClient instead of the REST client
+#Uses the MQTTClient 
 from Adafruit_IO import MQTTClient
 
 
-
-# holds the count for the feed
-global run_count
-
-ADAFRUIT_IO_USERNAME = "samuetor"
-ADAFRUIT_IO_KEY = "aio_xtjq36avTguBE0qVFQO24TNqPOWM"
+ADAFRUIT_IO_USERNAME = "poner su username"
+ADAFRUIT_IO_KEY      = "poner su clave"
 
 # Set to the ID of the feed to subscribe to for updates.
-#feedContador = 'contador'
-feedLed1 = 'Led1'
-feedLed2 = 'Led2'
-feedtemperatura = 'temperatura'
+feedsecuenciap = 'secuenciap'
+feedsecuenciao = 'secuenciao'
+feedestado = 'estado'
+feedconfirmar = 'confirmar'
+feedEEPROM = 'EEPROM'
+feedbrazo = 'brazo'
+feedcodo = 'codo'
+feedgarra = 'garra'
+feedrota = 'rota'
+feedes = 'es'
 
 mensaje = ''
 
 # Define callback functions which will be called when certain events happen.
 def connected(client):
-    """Connected function will be called when the client is connected to
-    Adafruit IO.This is a good place to subscribe to feed changes.  The client
-    parameter passed to this function is the Adafruit IO MQTT client so you
-    can make calls against it easily.
-    """
-    # Subscribe to changes on a feed named Counter.
-    #print('Subscribing to Feed {0} and {1}'.format(feedLed, feedContador))
-    client.subscribe(feedLed1)
-    client.subscribe(feedLed2)
-    client.subscribe(feedtemperatura)
-    print('Waiting for feed data...')
+
+    # Subscribe to changes on a feed 
+    client.subscribe(feedsecuenciap)
+    client.subscribe(feedsecuenciao)
+    client.subscribe(feedestado)
+    client.subscribe(feedconfirmar)
+    client.subscribe(feedEEPROM)
+    client.subscribe(feedbrazo)
+    client.subscribe(feedcodo)
+    client.subscribe(feedgarra)
+    client.subscribe(feedrota)
+    client.subscribe(feedes)
+    client.publish(feedes, 1)
+
 
 def disconnected(client):
     """Disconnected function will be called when the client disconnects."""
@@ -49,25 +54,34 @@ def message(client, feed_id, payload):
     """
     print('Feed {0} received new value: {1}'.format(feed_id, payload))
     
-    if(feed_id == feedLed1):
-        if(payload == '0'):
-            print('led1: OFF')
-            arduino.write(bytes('0\n', 'utf-8'))
+    if(feed_id == feedsecuenciap):
         if(payload == '1'):
-            print('led1: ON')
-            arduino.write(bytes('1\n', 'utf-8'))
-    if(feed_id == feedLed2):
-        if(payload == '0'):
-            print('led2: OFF')
-            arduino.write(bytes('0\n', 'utf-8'))
-        if(payload == '2'):
-            print('led2: ON')
-            arduino.write(bytes('2\n', 'utf-8'))
-
-
+            arduino.write(bytes('A\n', 'utf-8'))
     
-    
-
+    if(feed_id == feedsecuenciao):
+            if(payload == '2'):
+                arduino.write(bytes('B\n', 'utf-8'))
+                
+    if(feed_id == feedestado):
+            if(payload == '3'):
+                arduino.write(bytes('Q\n', 'utf-8'))
+                client.publish(feedes, 1)
+            
+            if(payload == '4'):
+                arduino.write(bytes('W\n', 'utf-8'))
+                client.publish(feedes, 2)
+            
+            if(payload == '5'):
+                arduino.write(bytes('E\n', 'utf-8'))
+                client.publish(feedes, 3)
+            
+    if(feed_id == feedconfirmar):
+        if(payload == '1'):
+                arduino.write(bytes('R\n', 'utf-8'))
+                
+    if(feed_id == feedgarra):
+        if (payload == '1'):
+            arduino.write(bytes(10, 'utf-8'))
 
 try:
     client = MQTTClient(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
@@ -81,10 +95,11 @@ try:
     client.connect()
     client.loop_background()
               
-    arduino = serial.Serial(port='/dev/cu.usbserial-4', baudrate =9600, timeout = 0.1)
+    arduino = serial.Serial(port='COM6', baudrate =9600, timeout = 0.1)
     
     while True:    
         mensaje = arduino.readline().decode('utf-8')
+        print(mensaje)
         if(mensaje == 'LED1\n'):
             print('LED 1\n')
             client.publish(feedLed1, 1)

@@ -25,7 +25,7 @@ void initUART9600()
 	UCSR0C = 0;
 	UCSR0C |= (1<<UCSZ01) | (1<<UCSZ00);
 	
-	//Paso 5: COnfigurar velocidad de baudrate a 9600
+	//Paso 5: Configurar velocidad de baudrate a 9600
 	UBRR0 = 103;
 	
 }

@@ -5,17 +5,18 @@
 // Proyecto: Proyecto brazo robotico 
 // Hardware: Atmega238P
 // Creado: 26/04/2024
-//Última modificación: 4/5/2024
+//Última modificación: 10/5/2024
 //******************************************************************************
 
 
 
-#define F_CPU 12000000
+#define F_CPU 16000000
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdint.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 
 
 #include "PWM1/PWM1.h"
@@ -26,16 +27,18 @@
 
 void setup(void);
 
-int caso = 0, activa = 0, estado = 0, activa2 = 0;
+int caso = 0, activa = 0,  activa2 = 0, estado = 0, activa3 = 0, sumaa = 0;
 int garra = 0, garra1 = 0, brazo = 0, brazo1 = 0, codo = 0, codo1 = 0, rota = 0, rota1 = 0;
-volatile char receivedChar = 0;
+volatile char receivedChar = 0, mover = 0;
+char anterior[]= {};
+
 
 void setup(void){
 	cli();  //Apagar interrupciones
 	
 	DDRB |= (1 << PORTB2) | (1 << PORTB1) | (1 << PORTB3); //PB1, PB2, PB3 como salida de servos
 	DDRC = 0;  //Puerto C como entrada
-	DDRD |= (1 << DDD3);   //PD3 como salida de servo
+	DDRD |= (1 << DDD3) | (1 << DDD4) | (1 << DDD5) | (1 << DDD6);   //PD3 como salida de servo, PD4 - PD6 salida de LEDS
 
 	
 	initFastPWM1(8);  //Iniciar funcion de FASTPWM en timer1
@@ -45,6 +48,7 @@ void setup(void){
 	initADC();   //Iniciar la funcion de ADC
 	initFastPWM2();  //Iniciar funcion de FASTPWM en timer2
 	initUART9600();
+	PORTD |=  (1 << DDD4);
 	
 	sei();   //Activar interrupciones
 
@@ -56,21 +60,32 @@ int main(void)
 	setup();
 	while (1)
 	{
-		
+		if (receivedChar == 'Q'){
+			estado = 0;
+			activa2 = 0;
+			receivedChar = 0;
+		}
+		else if (receivedChar == 'W'){
+			estado = 1;
+			activa2 = 0;
+			receivedChar = 0;
+		}
+		else if (receivedChar == 'E'){
+			estado = 2;
+			activa2 = 1;
+			receivedChar = 0;
+		}
+
 		switch (estado){
 			
-			case 0: //Si se desea manipular al robot con UART desde la computadora
+			case 0: //Si se desea manipular al robot con UART desde adafruit con secuencias
 			
-				
+				PORTD &=  (0 << DDD4);
+				PORTD |=  (1 << DDD5);
+				PORTD |=  (0 << DDD6);
+				activa3 = 0;
 								
 				if(activa == 0){
-				writeTextUART("\n\r     **************Hola como esta, A para subir, B para bajar, R para confirmar****************");   //Mostrar inicio 
-				writeUART(10);
-				writeUART(13);
-				writeUART(10);
-				writeTextUART("          Coloque posicion de inicio de garra");   
-				writeUART(10);
-				writeUART(13);
 				activa ++;   //Salir del menu 
 				}
 		
@@ -93,7 +108,7 @@ int main(void)
 								garra = garra + 10;
 								convertServo2(garra, channel2A);
 								receivedChar = 0;
-					
+					          
 								break;
 							
 							case 'B':
@@ -107,9 +122,6 @@ int main(void)
 							case 'R':
 								garra1 = garra;
 								activa ++;
-								writeTextUART("\n\r           Coloque posicion final de garra");
-								writeUART(10);
-								writeUART(13);
 								receivedChar = 0;
 								break;
 							
@@ -152,9 +164,6 @@ int main(void)
 							
 							case 'R':
 								activa ++;
-								writeTextUART("\n\r           Coloque posicion inicial de brazo");
-								writeUART(10);
-								writeUART(13);
 								receivedChar = 0;
 								break;
 							
@@ -196,9 +205,6 @@ int main(void)
 						case 'R':
 						brazo1 = brazo;
 						activa ++;
-						writeTextUART("\n\r           Coloque posicion final de brazo");
-						writeUART(10);
-						writeUART(13);
 						receivedChar = 0;
 						break;
 						
@@ -239,9 +245,6 @@ int main(void)
 				
 					case 'R':
 					activa ++;
-					writeTextUART("\n\r           Coloque posicion inicial de codo");
-					writeUART(10);
-					writeUART(13);
 					receivedChar = 0;
 					break;
 				
@@ -282,9 +285,6 @@ int main(void)
 				
 					case 'R':
 					activa ++;
-					writeTextUART("\n\r           Coloque posicion final de codo");
-					writeUART(10);
-					writeUART(13);
 					codo1 = codo;
 					receivedChar = 0;
 					break;
@@ -326,9 +326,6 @@ int main(void)
 					
 					case 'R':
 					activa ++;
-					writeTextUART("\n\r           Coloque posicion inicial de rotacion");
-					writeUART(10);
-					writeUART(13);
 					receivedChar = 0;
 					break;
 					
@@ -369,9 +366,6 @@ int main(void)
 					
 					case 'R':
 					activa ++;
-					writeTextUART("\n\r           Coloque posicion final de rotacion");
-					writeUART(10);
-					writeUART(13);
 					rota1 = rota;
 					receivedChar = 0;
 					break;
@@ -413,9 +407,6 @@ int main(void)
 					
 					case 'R':
 					activa ++;
-					writeTextUART("\n\r           Coloque R para Terminar la secuencia");
-					writeUART(10);
-					writeUART(13);
 					receivedChar = 0;
 					break;
 					
@@ -496,12 +487,6 @@ int main(void)
 			
 			
 			
-			
-			
-			
-			
-			
-			
 			//FIN
 			if (garra > garra1){
 			for (int w = garra; w>=garra1; w--){
@@ -560,11 +545,28 @@ int main(void)
 			
 		
 		}
-	break;
+			break;
 	
+		case 1: //Si se desea manipular al robot con EEPROM
+			PORTD |=  (1 << DDD4) | (1 << DDD5);  //encender los led correspondientes
+			if(activa3 == 1){
+				PORTD &=  (1 << DDD4) | (1 << DDD5);
+			}
+			else{
+				activa3 = 0;
+			}
+			
+			
+			
+			
+		break;
+		
+		case 2: //Si se desea manipular al robot desde adafruit
+			PORTD |=  (1 << DDD4) | (1 << DDD5) | (1 << DDD6);  //encender los led correspondientes
+			activa3 = 1;
+			
 	
-	
-	
+		break;
 		}
 	
 	
@@ -622,10 +624,33 @@ ISR (ADC_vect){
 
 ISR(USART_RX_vect)
 {
-	receivedChar = UDR0; // Almacena el carácter recibido
+	char temp = UDR0;
+
+	
+	if (temp != '\n'){  // Si es diferente que enter 
+		receivedChar = temp;  // Almacena el carácter recibido
+		
+		if (estado == 2)
+		{
+			anterior[sumaa] = receivedChar;
+			
+			if (sumaa == 2)
+			{
+				sumaa = 0;
+				UDR0 = anterior[0];
+				UDR0 = anterior[1];
+				UDR0 = anterior[2];
+			}
+			sumaa ++;
+		}
+	
+	}
 	
 	while(!(UCSR0A & (1<<UDRE0)));    //Mientras haya caracteres
-	UDR0 = receivedChar;
+	
+	
+	
+	
 
 }
 
