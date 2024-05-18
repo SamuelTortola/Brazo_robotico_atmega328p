@@ -9,8 +9,7 @@ import serial
 from Adafruit_IO import MQTTClient
 
 
-ADAFRUIT_IO_USERNAME = 
-ADAFRUIT_IO_KEY      = 
+ 
 
 # Set to the ID of the feed to subscribe to for updates.
 feedsecuenciap = 'secuenciap'
@@ -79,9 +78,135 @@ def message(client, feed_id, payload):
         if(payload == '1'):
                 arduino.write(bytes('R\n', 'utf-8'))
                 
-    if(feed_id == feedgarra):
-        if (payload == '1'):
-            arduino.write(bytes(10, 'utf-8'))
+                
+    if(feed_id == feedgarra or feed_id == feedcodo or feed_id == feedbrazo or feed_id == feedrota):
+        
+        if(feed_id == feedgarra):         #Ver que servomotor se desea mover
+            arduino.write(bytes('g\n', 'utf-8'))
+            time.sleep(0.1)   #tiempo paara que el atmega328p pueda procesar los datos
+            
+        if(feed_id == feedcodo):
+            arduino.write(bytes('a\n', 'utf-8'))
+            time.sleep(0.1)
+            
+        if(feed_id == feedbrazo):
+            arduino.write(bytes('b\n', 'utf-8'))
+            time.sleep(0.1)
+            
+        if(feed_id == feedrota):
+            arduino.write(bytes('c\n', 'utf-8'))
+            time.sleep(0.1)
+        
+        if (payload == '0'):  #Enviar el angulo deseado, segun estan los slider de adafruit
+            arduino.write(bytes('0\n', 'utf-8'))
+            
+        if (payload == '10'):
+            arduino.write(bytes('1\n', 'utf-8'))
+           
+            
+        if (payload == '20'):
+            arduino.write(bytes('2\n', 'utf-8'))
+          
+        
+        if (payload == '30'):
+            arduino.write(bytes('3\n', 'utf-8'))
+           
+            
+        if (payload == '40'):
+            arduino.write(bytes('4\n', 'utf-8'))
+           
+            
+        if (payload == '50'):
+            arduino.write(bytes('5\n', 'utf-8'))
+           
+        
+        if (payload == '60'):
+            arduino.write(bytes('6\n', 'utf-8'))
+            
+            
+        if (payload == '70'):
+            arduino.write(bytes('7\n', 'utf-8'))
+            
+            
+        if (payload == '80'):
+            arduino.write(bytes('8\n', 'utf-8'))
+            
+        
+        if (payload == '90'):
+            arduino.write(bytes('9\n', 'utf-8'))
+            
+            
+        if (payload == '100'):
+            arduino.write(bytes('A\n', 'utf-8'))
+          
+            
+        if (payload == '110'):
+            arduino.write(bytes('B\n', 'utf-8'))
+           
+        
+        if (payload == '120'):
+            arduino.write(bytes('C\n', 'utf-8'))
+           
+            
+        if (payload == '130'):
+             arduino.write(bytes('D\n', 'utf-8'))
+            
+            
+        if (payload == '140'):
+            arduino.write(bytes('e\n', 'utf-8'))
+         
+        
+        if (payload == '150'):
+            arduino.write(bytes('F\n', 'utf-8'))
+          
+            
+        if (payload == '160'):
+            arduino.write(bytes('G\n', 'utf-8'))
+       
+        
+        if (payload == '170'):
+            arduino.write(bytes('H\n', 'utf-8'))
+      
+            
+        if (payload == '180'):
+             arduino.write(bytes('I\n', 'utf-8'))
+ 
+            
+        if (payload == '190'):
+            arduino.write(bytes('J\n', 'utf-8'))
+
+        
+        if (payload == '200'):
+            arduino.write(bytes('K\n', 'utf-8'))
+
+            
+        if (payload == '210'):
+            arduino.write(bytes('L\n', 'utf-8'))
+  
+        
+        if (payload == '220'):
+            arduino.write(bytes('M\n', 'utf-8'))
+     
+            
+        if (payload == '230'):
+             arduino.write(bytes('N\n', 'utf-8'))
+      
+            
+        if (payload == '240'):
+            arduino.write(bytes('O\n', 'utf-8'))
+
+        
+        if (payload == '250'):
+            arduino.write(bytes('P\n', 'utf-8'))
+        
+        if (payload == '255'):
+            arduino.write(bytes('q\n', 'utf-8'))
+ 
+
+    
+        
+        
+           
 
 try:
     client = MQTTClient(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
@@ -98,14 +223,21 @@ try:
     arduino = serial.Serial(port='COM6', baudrate =9600, timeout = 0.1)
     
     while True:    
-        mensaje = arduino.readline().decode('utf-8')
+        mensaje = arduino.readline().decode('utf-8')     #Si se recibe un mensaje del atmega328p
         print(mensaje)
-        if(mensaje == 'LED1\n'):
-            print('LED 1\n')
-            client.publish(feedLed1, 1)
-        if(mensaje == 'LED2\n'):
-            print('LED 2\n')
-            client.publish(feedLed2, 2)
+        
+        if(mensaje == 'Z\n'):
+            print('Entrando a estado EEPROM\n')
+            client.publish(feedes, 2)   #Encender LEDs correspondientes en Adafruit
+            
+        if(mensaje == 'A\n'):
+            print('Entrando a estado en linea\n')
+            client.publish(feedes, 3)
+            
+        if(mensaje == 'B\n'):
+            print('Entrando a estado Manual\n')
+            client.publish(feedes, 1)
+       
         time.sleep(3)
         
         

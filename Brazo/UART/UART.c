@@ -1,9 +1,4 @@
-/*
- * UART.c
- *
- * Created: 4/05/2024 23:12:21
- *  Author: samue
- */ 
+
 
 
 #include "UART.h"

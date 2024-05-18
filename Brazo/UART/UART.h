@@ -1,9 +1,4 @@
-/*
- * UART.h
- *
- * Created: 4/05/2024 23:12:07
- *  Author: samue
- */ 
+
 
 
 #include <avr/io.h>

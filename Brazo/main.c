@@ -5,7 +5,7 @@
 // Proyecto: Proyecto brazo robotico 
 // Hardware: Atmega238P
 // Creado: 26/04/2024
-//Última modificación: 10/5/2024
+//Última modificación: 17/5/2024
 //******************************************************************************
 
 
@@ -23,23 +23,26 @@
 #include "ADC/ADC.h"
 #include "PWM2/PWM2.h"
 #include "UART/UART.h"
+#include "EEPROM/EEPROM.h"
 
 
 void setup(void);
 
-int caso = 0, activa = 0,  activa2 = 0, estado = 0, activa3 = 0, sumaa = 0;
+int caso = 0, activa = 0,  activa2 = 0, estado = 0, activa3 = 0, samtf=0, activa4 = 0, activa5 = 0, moverr = 0;      //Variables a utilizar para el procesamiento 
 int garra = 0, garra1 = 0, brazo = 0, brazo1 = 0, codo = 0, codo1 = 0, rota = 0, rota1 = 0;
 volatile char receivedChar = 0, mover = 0;
-char anterior[]= {};
+
 
 
 void setup(void){
 	cli();  //Apagar interrupciones
 	
 	DDRB |= (1 << PORTB2) | (1 << PORTB1) | (1 << PORTB3); //PB1, PB2, PB3 como salida de servos
-	DDRC = 0;  //Puerto C como entrada
+	DDRC =0;  //Puerto C como entrada
 	DDRD |= (1 << DDD3) | (1 << DDD4) | (1 << DDD5) | (1 << DDD6);   //PD3 como salida de servo, PD4 - PD6 salida de LEDS
-
+	DDRB &= 0b00001110;   //Activar entrada de pulsador 1 de estado, 2 de guardar/confirmar. 
+	PORTB = (1 << PORTB4) | (1 << PORTB0);  //Activar PULLUP 
+	DDRD = 0b01111000;
 	
 	initFastPWM1(8);  //Iniciar funcion de FASTPWM en timer1
 	channel(channelB, modo);
@@ -50,8 +53,14 @@ void setup(void){
 	initUART9600();
 	PORTD |=  (1 << DDD4);
 	
-	sei();   //Activar interrupciones
-
+	
+	
+		
+	EEPROM_write(0,'W');
+	char datoeeprom = EEPROM_read(0);
+	
+	UDR0 = datoeeprom;
+sei();   //Activar interrupciones
 }
 
 
@@ -59,21 +68,66 @@ int main(void)
 {
 	setup();
 	while (1)
-	{
+	{                                //Cambiar estado por medio de Adafruit 
 		if (receivedChar == 'Q'){
 			estado = 0;
 			activa2 = 0;
+			samtf = 0;
 			receivedChar = 0;
 		}
 		else if (receivedChar == 'W'){
 			estado = 1;
 			activa2 = 0;
+			samtf = 1;
 			receivedChar = 0;
+			
 		}
 		else if (receivedChar == 'E'){
 			estado = 2;
 			activa2 = 1;
+			samtf = 2;
+			UDR0 = 'A';
+			UDR0 = '\n';
 			receivedChar = 0;
+		
+		}
+		
+		
+	 if ((PINB & (1 << PINB4)) == 0)   //Cuando se presiona el boton de cambio de estado, cambiar estado
+		{
+			_delay_ms(30);    //antirrebote
+			samtf ++;
+			
+			if (samtf == 1)
+			{
+				estado = 1;
+				activa2 = 0;
+				 UDR0 = 'Z';
+				 UDR0 = '\n';
+			}
+			
+			else if (samtf == 2)
+			{
+				estado = 2;
+				activa2 = 1;
+				 UDR0 = 'A';
+				 UDR0 = '\n';
+			}
+			
+			
+			else if (samtf >= 3)
+			{
+				samtf = 0;
+				estado = 0;
+				activa2 = 0;
+				 UDR0 = 'B';
+				 UDR0 = '\n';
+			}
+			
+				while ((PINB & (1 << PINB4)) == 0)   //While para evitar sumas indebidas
+				{
+					_delay_ms(30);    //antirrebote
+				}
 		}
 
 		switch (estado){
@@ -90,8 +144,9 @@ int main(void)
 				}
 		
 				else if (activa == 1){
-					if(receivedChar != 0){      //Si la variable que hay en USART es diferente de cero
+					if(receivedChar != 0 || (PINC & (1 << PINC4)) || (PINC & (1 << PINC5)) || activa5 == 1){      //Si la variable que hay en USART es diferente de cero o pulsadores se presionan 
 						
+						activa5 = 1;
 						
 						if (garra >= 255){
 							garra = 254;
@@ -100,6 +155,28 @@ int main(void)
 							garra = 0;
 						}
 						
+						if ((PINC & (1 << PINC4)))
+						{
+							_delay_ms(15);
+							receivedChar = 'A';
+						}
+						
+						else if ((PINC & (1 << PINC5)))
+						{
+							_delay_ms(15);
+							receivedChar = 'B';
+						}
+						
+						else if ((PINB & (1 << PINB0))==0)
+						{
+							
+							receivedChar = 'R';
+						}
+						
+						while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+						{
+							_delay_ms(30);    //antirrebote
+						}
 						
 						switch(receivedChar)   //Switch para elegir que se desea
 						{
@@ -134,8 +211,9 @@ int main(void)
 				
 				
 				else if (activa == 2){
-					if(receivedChar != 0){      
-						
+					activa5 = 0;
+					if(receivedChar != 0 || (PINC & (1 << PINC4)) || (PINC & (1 << PINC5)) || (PINB & (1 << PINB0)) == 0){      
+					
 						
 						if (garra1 >= 255){
 							garra1 = 254;
@@ -143,6 +221,28 @@ int main(void)
 						else if (garra1 <= 1){
 							garra1 = 0;
 						}
+						
+						if ((PINC & (1 << PINC4)))
+						{
+							receivedChar = 'A';
+							_delay_ms(15);
+						}
+						
+						else if ((PINC & (1 << PINC5)))
+						{
+							receivedChar = 'B';
+							_delay_ms(15);
+						}
+						
+						else if ((PINB & (1 << PINB0))==0)
+						{
+							receivedChar = 'R';
+						}
+						
+							while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+							{
+								_delay_ms(30);    //antirrebote
+							}
 						
 						
 						switch(receivedChar)   //Switch para elegir que se desea
@@ -175,7 +275,7 @@ int main(void)
 				}
 				
 			else if (activa == 3){
-				if(receivedChar != 0){      //Si la variable que hay en USART es diferente de cero
+				if(receivedChar != 0 || (PINC & (1 << PINC4)) || (PINC & (1 << PINC5)) || (PINB & (1 << PINB0)) == 0){      //Si la variable que hay en USART es diferente de cero
 					
 					
 					if (brazo >= 255){
@@ -185,6 +285,27 @@ int main(void)
 						brazo = 0;
 					}
 					
+					if ((PINC & (1 << PINC4)))
+					{
+						receivedChar = 'A';
+						_delay_ms(25);
+					}
+					
+					else if ((PINC & (1 << PINC5)))
+					{
+						receivedChar = 'B';
+						_delay_ms(25);
+					}
+					
+					else if ((PINB & (1 << PINB0))==0)
+					{
+						receivedChar = 'R';
+					}
+					
+						while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+						{
+							_delay_ms(30);    //antirrebote
+						}
 					
 					switch(receivedChar)   //Switch para elegir que se desea
 					{
@@ -216,7 +337,7 @@ int main(void)
 			}
 			
 		else if (activa == 4){
-			if(receivedChar != 0){      //Si la variable que hay en USART es diferente de cero
+			if(receivedChar != 0 || (PINC & (1 << PINC4)) || (PINC & (1 << PINC5)) || (PINB & (1 << PINB0)) == 0){      //Si la variable que hay en USART es diferente de cero
 			
 			
 				if (brazo1 >= 255){
@@ -225,7 +346,28 @@ int main(void)
 				else if (brazo1 <= 1){
 					brazo1 = 0;
 				}
+				
+				if ((PINC & (1 << PINC4)))
+				{
+					receivedChar = 'A';
+					_delay_ms(25);
+				}
+				
+				else if ((PINC & (1 << PINC5)))
+				{
+					receivedChar = 'B';
+					_delay_ms(25);
+				}
+				
+				else if ((PINB & (1 << PINB0))==0)
+				{
+					receivedChar = 'R';
+				}
 			
+				while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+				{
+					_delay_ms(30);    //antirrebote
+				}
 			
 				switch(receivedChar)   //Switch para elegir que se desea
 				{
@@ -256,7 +398,7 @@ int main(void)
 		}
 		
 		else if (activa == 5){
-			if(receivedChar != 0){      //Si la variable que hay en USART es diferente de cero
+			if(receivedChar != 0 || (PINC & (1 << PINC4)) || (PINC & (1 << PINC5)) || (PINB & (1 << PINB0)) == 0){      //Si la variable que hay en USART es diferente de cero
 			
 			
 				if (codo >= 255){
@@ -265,7 +407,28 @@ int main(void)
 				else if (codo <= 1){
 					codo = 0;
 				}
+				
+				if ((PINC & (1 << PINC4)))
+				{
+					receivedChar = 'A';
+					_delay_ms(15);
+				}
+				
+				else if ((PINC & (1 << PINC5)))
+				{
+					receivedChar = 'B';
+					_delay_ms(15);
+				}
+				
+				else if ((PINB & (1 << PINB0))==0)
+				{
+					receivedChar = 'R';
+				}
 			
+				while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+				{
+					_delay_ms(30);    //antirrebote
+				}
 			
 				switch(receivedChar)   //Switch para elegir que se desea
 				{
@@ -297,7 +460,7 @@ int main(void)
 		}
 		
 		else if (activa == 6){
-			if(receivedChar != 0){      //Si la variable que hay en USART es diferente de cero
+			if(receivedChar != 0 || (PINC & (1 << PINC4)) || (PINC & (1 << PINC5)) || (PINB & (1 << PINB0)) == 0){      //Si la variable que hay en USART es diferente de cero
 				
 				
 				if (codo1 >= 255){
@@ -307,7 +470,28 @@ int main(void)
 					codo1 = 0;
 				}
 				
+				if ((PINC & (1 << PINC4)))
+				{
+					receivedChar = 'A';
+					_delay_ms(15);
+				}
 				
+				else if ((PINC & (1 << PINC5)))
+				{
+					receivedChar = 'B';
+					_delay_ms(15);
+				}
+				
+				else if ((PINB & (1 << PINB0))==0)
+				{
+					receivedChar = 'R';
+				}
+				
+					while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+					{
+						_delay_ms(30);    //antirrebote
+					}
+					
 				switch(receivedChar)   //Switch para elegir que se desea
 				{
 					case 'B':
@@ -337,7 +521,7 @@ int main(void)
 		}
 		
 		else if (activa == 7){
-			if(receivedChar != 0){      //Si la variable que hay en USART es diferente de cero
+			if(receivedChar != 0 || (PINC & (1 << PINC4)) || (PINC & (1 << PINC5)) || (PINB & (1 << PINB0)) == 0){      //Si la variable que hay en USART es diferente de cero
 				
 				
 				if (rota >= 255){
@@ -347,6 +531,27 @@ int main(void)
 					rota = 0;
 				}
 				
+				if ((PINC & (1 << PINC4)))
+				{
+					receivedChar = 'A';
+					_delay_ms(25);
+				}
+				
+				else if ((PINC & (1 << PINC5)))
+				{
+					receivedChar = 'B';
+					_delay_ms(25);
+				}
+				
+				else if ((PINB & (1 << PINB0))==0)
+				{
+					receivedChar = 'R';
+				}
+				
+					while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+					{
+						_delay_ms(30);    //antirrebote
+					}
 				
 				switch(receivedChar)   //Switch para elegir que se desea
 				{
@@ -378,7 +583,7 @@ int main(void)
 		}
 		
 		else if (activa == 8){
-			if(receivedChar != 0){      //Si la variable que hay en USART es diferente de cero
+			if(receivedChar != 0 || (PINC & (1 << PINC4)) || (PINC & (1 << PINC5)) || (PINB & (1 << PINB0)) == 0){      //Si la variable que hay en USART es diferente de cero
 				
 				
 				if (rota1 >= 255){
@@ -388,6 +593,27 @@ int main(void)
 					rota1 = 0;
 				}
 				
+				if ((PINC & (1 << PINC4)))
+				{
+					receivedChar = 'A';
+					_delay_ms(25);
+				}
+				
+				else if ((PINC & (1 << PINC5)))
+				{
+					receivedChar = 'B';
+					_delay_ms(25);
+				}
+				
+				else if ((PINB & (1 << PINB0))==0)
+				{
+					receivedChar = 'R';
+				}
+				
+					while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+					{
+						_delay_ms(30);    //antirrebote
+					}
 				
 				switch(receivedChar)   //Switch para elegir que se desea
 				{
@@ -419,12 +645,21 @@ int main(void)
 		
 		else if (activa == 9){
 			
-			if(receivedChar != 0){ 
-				activa2 = 0;
+			if(receivedChar != 0 || (PINB & (1 << PINB0)) == 0){ 
+				activa2 = 0;   //Reiniciar todas las variables 
 				activa = 0;
+				garra = 0;
+				garra1 = 0;
+				codo = 0;
+				codo1 = 0;
+				brazo = 0;
+				brazo1 = 0;
+				rota1 = 0;
+				rota = 0;
+				
 			 }
 				
-			         //INICIO
+			         //INICIO DE SECUENCIA AUTOMATICA
 			if (garra > garra1){
 			for (int w = garra1; w<=garra; w++){
 				convertServo2(w, channel2A);
@@ -438,7 +673,6 @@ int main(void)
 					_delay_ms(10);
 				}
 			}
-			
 			
 			
 			if (brazo > brazo1){
@@ -456,7 +690,7 @@ int main(void)
 			}
 			
 			
-			
+		
 			if (codo > codo1){
 				for (int w = codo1; w<=codo; w++){
 					convertServo(w, channelB);
@@ -500,6 +734,7 @@ int main(void)
 					_delay_ms(10);
 				}
 			}
+		
 			
 			if (brazo > brazo1){
 				for (int w = brazo; w>=brazo1; w--){
@@ -514,7 +749,7 @@ int main(void)
 				}
 			}
 			
-			
+		
 			if (codo > codo1){
 				for (int w = codo; w>=codo1; w--){
 					convertServo(w, channelB);
@@ -561,10 +796,484 @@ int main(void)
 			
 		break;
 		
+		
+		
+		
 		case 2: //Si se desea manipular al robot desde adafruit
 			PORTD |=  (1 << DDD4) | (1 << DDD5) | (1 << DDD6);  //encender los led correspondientes
 			activa3 = 1;
 			
+			if (receivedChar == 'g')      //Observar que servomotor se desea mover
+			{
+				moverr = 1;
+			}
+			
+		   if (receivedChar == 'a')
+			{
+				moverr = 2;
+			}
+			
+			if (receivedChar == 'b')
+			{
+				moverr = 3;
+			}
+			
+			if (receivedChar == 'c')
+			{
+				moverr = 4;
+			}
+			
+			
+			if (moverr == 1)      //Ver que servo se desea mover
+			{
+				switch(receivedChar){         //Enviar al servo el respectivo angulo 
+					case '0':
+					convertServo2(0, channel2A);
+					break;
+					
+					case '1':
+					convertServo2(10, channel2A);
+					break;
+					
+					case '2':
+					convertServo2(20, channel2A);
+					break;
+					
+					case '3':
+					convertServo2(30, channel2A);
+					break;
+					
+					case '4':
+					convertServo2(40, channel2A);
+					break;
+					
+					case '5':
+					convertServo2(50, channel2A);
+					break;
+					
+					case '6':
+					convertServo2(60, channel2A);
+					break;
+					
+					case '7':
+					convertServo2(70, channel2A);
+					break;
+					
+					case '8':
+					convertServo2(80, channel2A);
+					break;
+					
+					case '9':
+					convertServo2(90, channel2A);
+					break;
+					
+					case 'A':
+					convertServo2(100, channel2A);
+					break;
+					
+					case 'B':
+					convertServo2(110, channel2A);
+					break;
+					
+					case 'C':
+					convertServo2(120, channel2A);
+					break;
+					
+					case 'D':
+					convertServo2(130, channel2A);
+					break;
+					
+					case 'e':
+					convertServo2(140, channel2A);
+					break;
+					
+					case 'F':
+					convertServo2(150, channel2A);
+					break;
+					
+					case 'G':
+					convertServo2(160, channel2A);
+					break;
+					
+					case 'H':
+					convertServo2(170, channel2A);
+					break;
+					
+					case 'I':
+					convertServo2(180, channel2A);
+					break;
+					
+					case 'J':
+					convertServo2(190, channel2A);
+					break;
+					
+					case 'K':
+					convertServo2(200, channel2A);
+					break;
+					
+					case 'L':
+					convertServo2(210, channel2A);
+					break;
+					
+					case 'M':
+					convertServo2(220, channel2A);
+					break;
+					
+					case 'N':
+					convertServo2(230, channel2A);
+					break;
+					
+					case 'O':
+					convertServo2(240, channel2A);
+					break;
+					
+					case 'P':
+					convertServo2(250, channel2A);
+					break;
+					
+					case 'q':
+					convertServo2(255, channel2A);
+					break;
+					
+				}
+			}
+			
+		 if (moverr == 2)
+			{
+				switch(receivedChar){
+					case '0':
+					convertServo(0, channelB);
+					break;
+					
+					case '1':
+					convertServo(10, channelB);
+					break;
+					
+					case '2':
+					convertServo(20, channelB);
+					break;
+					
+					case '3':
+					convertServo(30, channelB);
+					break;
+					
+					case '4':
+					convertServo(40, channelB);
+					break;
+					
+					case '5':
+					convertServo(50, channelB);
+					break;
+					
+					case '6':
+					convertServo(60, channelB);
+					break;
+					
+					case '7':
+					convertServo(70, channelB);
+					break;
+					
+					case '8':
+					convertServo(80, channelB);
+					break;
+					
+					case '9':
+					convertServo(90, channelB);
+					break;
+					
+					case 'A':
+					convertServo(100, channelB);
+					break;
+					
+					case 'B':
+					convertServo(110, channelB);
+					break;
+					
+					case 'C':
+					convertServo(120, channelB);
+					break;
+					
+					case 'D':
+					convertServo(130, channelB);
+					break;
+					
+					case 'e':
+					convertServo(140, channelB);
+					break;
+					
+					case 'F':
+					convertServo(150, channelB);
+					break;
+					
+					case 'G':
+					convertServo(160, channelB);
+					break;
+					
+					case 'H':
+					convertServo(170, channelB);
+					break;
+					
+					case 'I':
+					convertServo(180, channelB);
+					break;
+					
+					case 'J':
+					convertServo(190, channelB);
+					break;
+					
+					case 'K':
+					convertServo(200, channelB);
+					break;
+					
+					case 'L':
+					convertServo(210, channelB);
+					break;
+					
+					case 'M':
+					convertServo(220, channelB);
+					break;
+					
+					case 'N':
+					convertServo(230, channelB);
+					break;
+					
+					case 'O':
+					convertServo(240, channelB);
+					break;
+					
+					case 'P':
+					convertServo(250, channelB);
+					break;
+					
+					case 'q':
+					convertServo(255, channelB);
+					break;
+					
+				}
+			}
+			
+		   if (moverr == 3)
+			{
+				switch(receivedChar){
+					case '0':
+					convertServo(0, channelA);
+					break;
+					
+					case '1':
+					convertServo(10, channelA);
+					break;
+					
+					case '2':
+					convertServo(20, channelA);
+					break;
+					
+					case '3':
+					convertServo(30, channelA);
+					break;
+					
+					case '4':
+					convertServo(40, channelA);
+					break;
+					
+					case '5':
+					convertServo(50, channelA);
+					break;
+					
+					case '6':
+					convertServo(60, channelA);
+					break;
+					
+					case '7':
+					convertServo(70, channelA);
+					break;
+					
+					case '8':
+					convertServo(80, channelA);
+					break;
+					
+					case '9':
+					convertServo(90, channelA);
+					break;
+					
+					case 'A':
+					convertServo(100, channelA);
+					break;
+					
+					case 'B':
+					convertServo(110, channelA);
+					break;
+					
+					case 'C':
+					convertServo(120, channelA);
+					break;
+					
+					case 'D':
+					convertServo(130, channelA);
+					break;
+					
+					case 'e':
+					convertServo(140, channelA);
+					break;
+					
+					case 'F':
+					convertServo(150, channelA);
+					break;
+					
+					case 'G':
+					convertServo(160, channelA);
+					break;
+					
+					case 'H':
+					convertServo(170, channelA);
+					break;
+					
+					case 'I':
+					convertServo(180, channelA);
+					break;
+					
+					case 'J':
+					convertServo(190, channelA);
+					break;
+					
+					case 'K':
+					convertServo(200, channelA);
+					break;
+					
+					case 'L':
+					convertServo(210, channelA);
+					break;
+					
+					case 'M':
+					convertServo(220, channelA);
+					break;
+					
+					case 'N':
+					convertServo(230, channelA);
+					break;
+					
+					case 'O':
+					convertServo(240, channelA);
+					break;
+					
+					
+				}
+			}
+			
+			if (moverr == 4)
+			{
+				switch(receivedChar){
+					case '0':
+					convertServo2(0, channel2B);
+					break;
+					
+					case '1':
+					convertServo2(10, channel2B);
+					break;
+					
+					case '2':
+					convertServo2(20, channel2B);
+					break;
+					
+					case '3':
+					convertServo2(30, channel2B);
+					break;
+					
+					case '4':
+					convertServo2(40, channel2B);
+					break;
+					
+					case '5':
+					convertServo2(50, channel2B);
+					break;
+					
+					case '6':
+					convertServo2(60, channel2B);
+					break;
+					
+					case '7':
+					convertServo2(70, channel2B);
+					break;
+					
+					case '8':
+					convertServo2(80, channel2B);
+					break;
+					
+					case '9':
+					convertServo2(90, channel2B);
+					break;
+					
+					case 'A':
+					convertServo2(100, channel2B);
+					break;
+					
+					case 'B':
+					convertServo2(110, channel2B);
+					break;
+					
+					case 'C':
+					convertServo2(120, channel2B);
+					break;
+					
+					case 'D':
+					convertServo2(130, channel2B);
+					break;
+					
+					case 'e':
+					convertServo2(140, channel2B);
+					break;
+					
+					case 'F':
+					convertServo2(150, channel2B);
+					break;
+					
+					case 'G':
+					convertServo2(160, channel2B);
+					break;
+					
+					case 'H':
+					convertServo2(170, channel2B);
+					break;
+					
+					case 'I':
+					convertServo2(180, channel2B);
+					break;
+					
+					case 'J':
+					convertServo2(190, channel2B);
+					break;
+					
+					case 'K':
+					convertServo2(200, channel2B);
+					break;
+					
+					case 'L':
+					convertServo2(210, channel2B);
+					break;
+					
+					case 'M':
+					convertServo2(220, channel2B);
+					break;
+					
+					case 'N':
+					convertServo2(230, channel2B);
+					break;
+					
+					case 'O':
+					convertServo2(240, channel2B);
+					break;
+					
+					case 'P':
+					convertServo2(250, channel2B);
+					break;
+					
+					case 'q':
+					convertServo2(255, channel2B);
+					break;
+					
+				}
+			}
+			 
+			receivedChar = 0;
 	
 		break;
 		}
@@ -629,28 +1338,9 @@ ISR(USART_RX_vect)
 	
 	if (temp != '\n'){  // Si es diferente que enter 
 		receivedChar = temp;  // Almacena el carácter recibido
-		
-		if (estado == 2)
-		{
-			anterior[sumaa] = receivedChar;
-			
-			if (sumaa == 2)
-			{
-				sumaa = 0;
-				UDR0 = anterior[0];
-				UDR0 = anterior[1];
-				UDR0 = anterior[2];
-			}
-			sumaa ++;
-		}
-	
 	}
 	
 	while(!(UCSR0A & (1<<UDRE0)));    //Mientras haya caracteres
 	
-	
-	
-	
-
 }
 
