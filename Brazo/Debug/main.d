@@ -18,6 +18,7 @@ main.d main.o: .././main.c \
  d:\programas\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdarg.h \
  d:\programas\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stddef.h \
  d:\programas\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h \
+ d:\programas\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\eeprom.h \
  .././PWM1/PWM1.h .././ADC/ADC.h .././PWM2/PWM2.h .././UART/UART.h \
  .././EEPROM/EEPROM.h
 
@@ -58,6 +59,8 @@ d:\programas\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr
 d:\programas\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stddef.h:
 
 d:\programas\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h:
+
+d:\programas\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\eeprom.h:
 
 .././PWM1/PWM1.h:
 

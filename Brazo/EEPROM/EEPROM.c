@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 
-void EEPROM_write(unsigned int uiAddress, unsigned char ucData)
+void EEPROM_write(unsigned int uiAddress, unsigned int ucData)
 {
 
 	/* Wait for completion of previous write */
@@ -23,7 +23,7 @@ void EEPROM_write(unsigned int uiAddress, unsigned char ucData)
 
 
 
-unsigned char EEPROM_read(unsigned int uiAddress)
+unsigned int EEPROM_read(unsigned int uiAddress)
 {
 
 	/* Wait for completion of previous write */

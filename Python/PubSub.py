@@ -8,7 +8,8 @@ import serial
 #Uses the MQTTClient 
 from Adafruit_IO import MQTTClient
 
-
+ADAFRUIT_IO_USERNAME = "USUARIO"
+ADAFRUIT_IO_KEY      = "CONTRASEÑA"
  
 
 # Set to the ID of the feed to subscribe to for updates.
@@ -77,6 +78,24 @@ def message(client, feed_id, payload):
     if(feed_id == feedconfirmar):
         if(payload == '1'):
                 arduino.write(bytes('R\n', 'utf-8'))
+                
+        if(payload == 'A'):
+                arduino.write(bytes('A\n', 'utf-8'))
+                
+        if(payload == 'B'):
+                arduino.write(bytes('B\n', 'utf-8'))
+                
+        if(payload == 'C'):
+                arduino.write(bytes('C\n', 'utf-8'))
+                
+        if(payload == 'D'):
+                arduino.write(bytes('D\n', 'utf-8'))
+                
+                
+                
+    if(feed_id == feedEEPROM):
+        if(payload == '1'):
+                arduino.write(bytes('l\n', 'utf-8'))
                 
                 
     if(feed_id == feedgarra or feed_id == feedcodo or feed_id == feedbrazo or feed_id == feedrota):

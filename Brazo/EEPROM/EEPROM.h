@@ -6,9 +6,9 @@
 #ifndef EEPROM_H_
 #define EEPROM_H_
 
-void EEPROM_write(unsigned int uiAddress, unsigned char ucData);
+void EEPROM_write(unsigned int uiAddress, unsigned int ucData);
 
-unsigned char EEPROM_read(unsigned int uiAddress);
+unsigned int EEPROM_read(unsigned int uiAddress);
 
 
 

@@ -5,7 +5,7 @@
 // Proyecto: Proyecto brazo robotico 
 // Hardware: Atmega238P
 // Creado: 26/04/2024
-//Última modificación: 17/5/2024
+//Última modificación: 18/5/2024
 //******************************************************************************
 
 
@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <avr/eeprom.h>
 
 #include "PWM1/PWM1.h"
 #include "ADC/ADC.h"
@@ -29,8 +29,14 @@
 void setup(void);
 
 int caso = 0, activa = 0,  activa2 = 0, estado = 0, activa3 = 0, samtf=0, activa4 = 0, activa5 = 0, moverr = 0;      //Variables a utilizar para el procesamiento 
-int garra = 0, garra1 = 0, brazo = 0, brazo1 = 0, codo = 0, codo1 = 0, rota = 0, rota1 = 0;
+int garra = 0, garra1 = 0, brazo = 0, brazo1 = 0, codo = 0, codo1 = 0, rota = 0, rota1 = 0, sumar = 0;
 volatile char receivedChar = 0, mover = 0;
+int anterior1 = 0;
+
+uint8_t pos1[4]={};    //Guardar posicion 1 de servomotores en EEPROM
+uint8_t pos2[4]={};    //Guardar posicion 2 de servomotores en EEPROM
+uint8_t pos3[4]={};    //Guardar posicion 3 de servomotores en EEPROM
+uint8_t pos4[4]={};    //Guardar posicion 4 de servomotores en EEPROM
 
 
 
@@ -53,14 +59,7 @@ void setup(void){
 	initUART9600();
 	PORTD |=  (1 << DDD4);
 	
-	
-	
-		
-	EEPROM_write(0,'W');
-	char datoeeprom = EEPROM_read(0);
-	
-	UDR0 = datoeeprom;
-sei();   //Activar interrupciones
+    sei();   //Activar interrupciones
 }
 
 
@@ -794,6 +793,130 @@ int main(void)
 			
 			
 			
+			if ((PINB & (1 << PINB0)) == 0  || receivedChar == 'l')    //Si se presiona el segundo pulsador guardar posicion en EEPROM
+			{
+				_delay_ms(20);
+				sumar ++;
+				receivedChar = 0;
+				
+				      //Verificar que valor tiene la posicion actual y almacenar los valores
+				      if (sumar == 1)
+				      {
+					      EEPROM_write(0,garra);          //Almacenar cada valor de cada servomotor
+						  EEPROM_write(1,brazo);
+						  EEPROM_write(2,codo);
+						  EEPROM_write(3,rota);
+				      }
+				      
+				      else if (sumar == 2)
+				      {
+						  EEPROM_write(4,garra);
+						  EEPROM_write(5,brazo);
+						  EEPROM_write(6,codo);
+						  EEPROM_write(7,rota);
+					      
+				      }
+				      
+				      else if (sumar == 3)
+				      {
+					      EEPROM_write(8,garra);
+					      EEPROM_write(9,brazo);
+					      EEPROM_write(10,codo);
+					      EEPROM_write(11,rota);
+					      
+				      }
+				      
+				      else if (sumar == 4)
+				      {
+					      sumar = 0;
+						   EEPROM_write(12,garra);
+						   EEPROM_write(13,brazo);
+						   EEPROM_write(14,codo);
+						   EEPROM_write(15,rota);
+					     
+				      }
+			}
+					     //Verificar que pulsador se presionó y mostrar la posicion grabada en EEPROM
+			if(PINC & (1 << PINC4) || receivedChar == 'A'){
+				_delay_ms(15);
+				 activa2 = 1;
+				 int  datoeeprom = EEPROM_read(0);
+				 convertServo2(datoeeprom, channel2A);  //garra
+				 
+				 datoeeprom = EEPROM_read(1);  //brazo
+				 convertServo(datoeeprom, channelA);
+				 
+				  datoeeprom = EEPROM_read(2);  //codo
+				  convertServo(datoeeprom, channelB);
+				  
+				   datoeeprom = EEPROM_read(3);  //rota
+				   convertServo2(datoeeprom, channel2B);
+				   receivedChar = 0;
+			}
+			
+			if(PINC & (1 << PINC5) || receivedChar == 'B'){
+				_delay_ms(15);
+				 activa2 = 1;
+				 int  datoeeprom = EEPROM_read(4);
+				 convertServo2(datoeeprom, channel2A); //garra
+				 
+				 datoeeprom = EEPROM_read(5);  //brazo
+				 convertServo(datoeeprom, channelA);
+				 
+				 datoeeprom = EEPROM_read(6);  //codo
+				 convertServo(datoeeprom, channelB);
+				 
+				 datoeeprom = EEPROM_read(7);  //rota
+				 convertServo2(datoeeprom, channel2B);
+				 receivedChar = 0;
+			}
+			
+			if(PINB & (1 << PINB5) || receivedChar == 'C'){
+				_delay_ms(15);
+				 activa2 = 1;
+				 int  datoeeprom = EEPROM_read(8);
+				 convertServo2(datoeeprom, channel2A); //garra
+				 
+				 datoeeprom = EEPROM_read(9);  //brazo
+				 convertServo(datoeeprom, channelA);
+				 
+				 datoeeprom = EEPROM_read(10);  //codo
+				 convertServo(datoeeprom, channelB);
+				 
+				 datoeeprom = EEPROM_read(11);  //rota
+				 convertServo2(datoeeprom, channel2B);
+				 receivedChar = 0;
+			}
+			
+			if(PIND & (1 << PIND7) || receivedChar == 'D'){
+				_delay_ms(15);
+				 activa2 = 1;
+				 int  datoeeprom = EEPROM_read(12);
+				 convertServo2(datoeeprom, channel2A); //garra
+				 
+				 datoeeprom = EEPROM_read(13);  //brazo
+				 convertServo(datoeeprom, channelA);
+				 
+				 datoeeprom = EEPROM_read(14);  //codo
+				 convertServo(datoeeprom, channelB);
+				 
+				 datoeeprom = EEPROM_read(15);  //rota
+				 convertServo2(datoeeprom, channel2B);
+				 receivedChar = 0;
+			}
+	
+			
+			
+			
+			
+			
+			
+			while ((PINB & (1 << PINB0)) == 0)   //While para evitar sumas indebidas
+			{
+				_delay_ms(30);    //antirrebote
+			}
+			
+			
 		break;
 		
 		
@@ -1300,6 +1423,7 @@ ISR (ADC_vect){
 				convertServo(ADCH, channelB);   //enviar señal a canal B de timer1
 				codo = ADCH;
 				break;
+				
 			case 1:
 				ADMUX &= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));   //Borrar configuracion actual y poner ADC1
 				ADMUX |= (1<<MUX0);
