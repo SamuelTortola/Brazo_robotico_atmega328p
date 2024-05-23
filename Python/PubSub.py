@@ -8,8 +8,7 @@ import serial
 #Uses the MQTTClient 
 from Adafruit_IO import MQTTClient
 
-ADAFRUIT_IO_USERNAME = "samuetor"
-ADAFRUIT_IO_KEY      = "aio_QRZh35D1qNS7Db7NLMfIMuX1OHoj"
+
  
 
 # Set to the ID of the feed to subscribe to for updates.
