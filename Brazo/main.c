@@ -5,7 +5,7 @@
 // Proyecto: Proyecto brazo robotico 
 // Hardware: Atmega238P
 // Creado: 26/04/2024
-//Última modificación: 18/5/2024
+//Última modificación: 22/5/2024
 //******************************************************************************
 
 
@@ -32,11 +32,6 @@ int caso = 0, activa = 0,  activa2 = 0, estado = 0, activa3 = 0, samtf=0, activa
 int garra = 0, garra1 = 0, brazo = 0, brazo1 = 0, codo = 0, codo1 = 0, rota = 0, rota1 = 0, sumar = 0;
 volatile char receivedChar = 0, mover = 0;
 int anterior1 = 0;
-
-uint8_t pos1[4]={};    //Guardar posicion 1 de servomotores en EEPROM
-uint8_t pos2[4]={};    //Guardar posicion 2 de servomotores en EEPROM
-uint8_t pos3[4]={};    //Guardar posicion 3 de servomotores en EEPROM
-uint8_t pos4[4]={};    //Guardar posicion 4 de servomotores en EEPROM
 
 
 

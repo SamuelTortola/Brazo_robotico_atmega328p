@@ -15,19 +15,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   5 .debug_aranges 00000110  00000000  00000000  00001f68  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00002fb4  00000000  00000000  00002078  2**0
+  6 .debug_info   00002f55  00000000  00000000  00002078  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000a23  00000000  00000000  0000502c  2**0
+  7 .debug_abbrev 00000a11  00000000  00000000  00004fcd  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00001c7c  00000000  00000000  00005a4f  2**0
+  8 .debug_line   00001c7c  00000000  00000000  000059de  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  000001d8  00000000  00000000  000076cc  2**2
+  9 .debug_frame  000001d8  00000000  00000000  0000765c  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000005ec  00000000  00000000  000078a4  2**0
+ 10 .debug_str    000005cf  00000000  00000000  00007834  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000013a1  00000000  00000000  00007e90  2**0
+ 11 .debug_loc    000013a1  00000000  00000000  00007e03  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 000000b0  00000000  00000000  00009231  2**0
+ 12 .debug_ranges 000000b0  00000000  00000000  000091a4  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -471,7 +471,7 @@ unsigned int EEPROM_read(unsigned int uiAddress)
      318:	08 95       	ret
 
 0000031a <setup>:
-uint8_t pos4[4]={};    //Guardar posicion 4 de servomotores en EEPROM
+int anterior1 = 0;
 
 
 

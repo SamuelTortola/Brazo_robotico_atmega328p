@@ -34,10 +34,6 @@ Discarded input sections
  .text          0x00000000        0x0 main.o
  .data          0x00000000        0x0 main.o
  .bss           0x00000000        0x0 main.o
- .bss.pos4      0x00000000        0x4 main.o
- .bss.pos3      0x00000000        0x4 main.o
- .bss.pos2      0x00000000        0x4 main.o
- .bss.pos1      0x00000000        0x4 main.o
  .bss.anterior1
                 0x00000000        0x2 main.o
  .bss.mover     0x00000000        0x1 main.o
@@ -598,25 +594,25 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x2fb4
+.debug_info     0x00000000     0x2f55
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x5f4 D:/Programas/Microchip studio/7.0/Packs/Atmel/ATmega_DFP/2.1.506/gcc/dev/atmega328p/avr5/crtatmega328p.o
  .debug_info    0x000005f4       0x82 ADC/ADC.o
  .debug_info    0x00000676       0xde EEPROM/EEPROM.o
- .debug_info    0x00000754     0x2504 main.o
- .debug_info    0x00002c58      0x16f PWM1/PWM1.o
- .debug_info    0x00002dc7       0xf8 PWM2/PWM2.o
- .debug_info    0x00002ebf       0xf5 UART/UART.o
+ .debug_info    0x00000754     0x24a5 main.o
+ .debug_info    0x00002bf9      0x16f PWM1/PWM1.o
+ .debug_info    0x00002d68       0xf8 PWM2/PWM2.o
+ .debug_info    0x00002e60       0xf5 UART/UART.o
 
-.debug_abbrev   0x00000000      0xa23
+.debug_abbrev   0x00000000      0xa11
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x5a2 D:/Programas/Microchip studio/7.0/Packs/Atmel/ATmega_DFP/2.1.506/gcc/dev/atmega328p/avr5/crtatmega328p.o
  .debug_abbrev  0x000005a2       0x4f ADC/ADC.o
  .debug_abbrev  0x000005f1       0x8b EEPROM/EEPROM.o
- .debug_abbrev  0x0000067c      0x1b4 main.o
- .debug_abbrev  0x00000830       0xa2 PWM1/PWM1.o
- .debug_abbrev  0x000008d2       0x9a PWM2/PWM2.o
- .debug_abbrev  0x0000096c       0xb7 UART/UART.o
+ .debug_abbrev  0x0000067c      0x1a2 main.o
+ .debug_abbrev  0x0000081e       0xa2 PWM1/PWM1.o
+ .debug_abbrev  0x000008c0       0x9a PWM2/PWM2.o
+ .debug_abbrev  0x0000095a       0xb7 UART/UART.o
 
 .debug_line     0x00000000     0x1c7c
  *(.debug_line .debug_line.* .debug_line_end)
@@ -637,20 +633,20 @@ END GROUP
  .debug_frame   0x00000160       0x34 PWM2/PWM2.o
  .debug_frame   0x00000194       0x44 UART/UART.o
 
-.debug_str      0x00000000      0x5ec
+.debug_str      0x00000000      0x5cf
  *(.debug_str)
  .debug_str     0x00000000      0x208 D:/Programas/Microchip studio/7.0/Packs/Atmel/ATmega_DFP/2.1.506/gcc/dev/atmega328p/avr5/crtatmega328p.o
  .debug_str     0x00000208      0x169 ADC/ADC.o
                                 0x19d (size before relaxing)
  .debug_str     0x00000371       0x46 EEPROM/EEPROM.o
                                 0x1ce (size before relaxing)
- .debug_str     0x000003b7      0x18d main.o
-                                0x33b (size before relaxing)
- .debug_str     0x00000544       0x48 PWM1/PWM1.o
+ .debug_str     0x000003b7      0x170 main.o
+                                0x31e (size before relaxing)
+ .debug_str     0x00000527       0x48 PWM1/PWM1.o
                                 0x204 (size before relaxing)
- .debug_str     0x0000058c       0x2a PWM2/PWM2.o
+ .debug_str     0x0000056f       0x2a PWM2/PWM2.o
                                 0x1d6 (size before relaxing)
- .debug_str     0x000005b6       0x36 UART/UART.o
+ .debug_str     0x00000599       0x36 UART/UART.o
                                 0x1d9 (size before relaxing)
 
 .debug_loc      0x00000000     0x13a1
